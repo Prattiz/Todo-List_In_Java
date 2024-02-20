@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.thiago.todolist.users.UserModel;
-import br.com.thiago.todolist.users.repository.IUserRepos;
+import br.com.thiago.todolist.users.repository.InUserRepos;
 
 
 @RestController
@@ -18,12 +18,12 @@ import br.com.thiago.todolist.users.repository.IUserRepos;
 public class UserController {
 
     @Autowired
-    private IUserRepos userRepos;
+    private InUserRepos inUserRepos;
     
     @GetMapping("/")
     public ResponseEntity create(@RequestBody UserModel userModel) {
 
-        var user = this.userRepos.findByUsername(userModel.getUsername());
+        var user = this.inUserRepos.findByUsername(userModel.getUsername());
 
         if(user != null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
@@ -36,7 +36,7 @@ public class UserController {
 
         
 
-        var userCreated = this.userRepos.save(userModel);
+        var userCreated = this.inUserRepos.save(userModel);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
 

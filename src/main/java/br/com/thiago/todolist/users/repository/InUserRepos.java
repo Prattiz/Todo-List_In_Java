@@ -8,7 +8,7 @@ import br.com.thiago.todolist.users.UserModel;
 
 
 
-public interface IUserRepos extends JpaRepository<UserModel, UUID> {
+public interface InUserRepos extends JpaRepository<UserModel, UUID> {
 
     UserModel findByUsername(String username);
 } 
