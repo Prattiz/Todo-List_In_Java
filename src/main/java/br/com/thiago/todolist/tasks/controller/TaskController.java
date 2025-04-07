@@ -1,91 +1,87 @@
 package br.com.thiago.todolist.tasks.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
+// import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import br.com.thiago.todolist.tasks.TaskModel;
 import br.com.thiago.todolist.tasks.repository.InTasksRepos;
-import br.com.thiago.todolist.utils.Utils;
-import jakarta.servlet.http.HttpServletRequest;
+import br.com.thiago.todolist.users.UserModel;
+import br.com.thiago.todolist.users.repository.InUserRepos;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
 @RequestMapping("/tasks")
+@Tag(name = "Tasks", description = "Endpoints para gerenciamento de tarefas")
 public class TaskController {
 
     @Autowired
-    private InTasksRepos inTasksRepos;
+    private InTasksRepos taskRepository;
+
+    @Autowired
+    private InUserRepos userRepository;
+
     
-    @PostMapping("/")
-    public ResponseEntity create(@RequestBody TaskModel taskModel, HttpServletRequest request){
-        
-        var idUser = request.getAttribute("idUser");
+    @PostMapping("/{userId}")
+    @Operation(
+        summary = "Criar tarefa para um usuário",
+        description = "Cria uma nova tarefa vinculada a um usuário específico",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Dados da nova tarefa",
+            content = @Content(
+                mediaType = "application/json",
+                examples = {
+                    @ExampleObject(
+                        name = "Exemplo de tarefa",
+                        value = """
+                        {
+                          "title": "Estudar Spring Boot",
+                          "description": "Revisar anotações e fazer projeto",
+                          "priority": "Alta",
+                          "startsAt": "2025-04-07T10:00:00",
+                          "endsAt": "2025-04-07T12:00:00"
+                        }
+                        """
+                    )
+                }
+            )
+        )
+    )
+    public ResponseEntity<Object> createTask(@PathVariable UUID userId, @RequestBody TaskModel taskData) {
 
-        taskModel.setIdUser((UUID) idUser);
+        Optional<UserModel> optionalUser = userRepository.findById(userId);
 
-        var currentDate = LocalDateTime.now();
-        
-        if(currentDate.isAfter(taskModel.getStartsAt()) || currentDate.isAfter(taskModel.getEndsAt())){
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("The start date or end date must be greater than the current date");
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(404).body("Usuário não encontrado.");
         }
 
-        if(taskModel.getStartsAt().isAfter(taskModel.getEndsAt())){
+        TaskModel task = new TaskModel();
+        task.setUser(optionalUser.get());
+        task.setTitle(taskData.getTitle());
+        task.setDescription(taskData.getDescription());
+        task.setPriority(taskData.getPriority());
+        task.setStartsAt(taskData.getStartsAt());
+        task.setEndsAt(taskData.getEndsAt());
+        task.setUser(optionalUser.get());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("The start date must be less than the end date");
-        }
+        TaskModel savedTask = taskRepository.save(task);
 
-        var task = this.inTasksRepos.save(taskModel);
-
-
-
-        return ResponseEntity.status(HttpStatus.OK).body(task);
+        return ResponseEntity.status(201).body(savedTask);
     }
 
-    @GetMapping("/")
-    public List<TaskModel> list(HttpServletRequest request){
+    // @GetMapping("/{userId}")
+    // public ResponseEntity<List<TaskModel>> getUserTasks(@PathVariable UUID userId) {
 
-        var idUser = request.getAttribute("idUser");
-
-        return this.inTasksRepos.findByIdUser((UUID) idUser);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request){
-
-        var task = this.inTasksRepos.findById(id).orElse(null);
-
-        if(task == null){
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Task not found");
-        }
-        
-        var idUser = request.getAttribute("idUser");
-
-        if(!task.getIdUser().equals(idUser)){
-            
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("User does not have permission to change this task");
-        }
-
-        Utils.copyNonNullProperties(taskModel, task);
-
-        var result = this.inTasksRepos.save(task);
-
-        return ResponseEntity.ok().body(result);
-    }
+    //     List<TaskModel> tasks = taskRepository.findByUserId(userId);
+    //     return ResponseEntity.ok(tasks);
+    // }
 }

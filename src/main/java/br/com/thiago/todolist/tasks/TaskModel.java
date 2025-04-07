@@ -5,45 +5,34 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import br.com.thiago.todolist.users.UserModel;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
 @Entity(name = "tb_tasks")
 public class TaskModel {
-    
+
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    private String description;
 
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String title;
+
+    private String description;
     private String priority;
-
-
     private LocalDateTime startsAt;
     private LocalDateTime endsAt;
-
-    private UUID idUser;
-
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public void setTitle(String title) throws Exception{
-
-        if(title.length() > 50){
-            throw new Exception("The field must contain a maximum of 50 characters");
-        }
-        
-        this.title = title;
-    }
-
-
-
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"password"}) // oculta a senha no JSON
+    private UserModel user;
 }
