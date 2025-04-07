@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import br.com.thiago.todolist.users.UserModel;
@@ -33,6 +32,6 @@ public class TaskModel {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties({"password"}) // oculta a senha no JSON
+    @JsonIgnoreProperties({"password"}) 
     private UserModel user;
 }

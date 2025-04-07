@@ -15,7 +15,6 @@ import br.com.thiago.todolist.users.repository.InUserRepos;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 
@@ -25,10 +24,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class TaskController {
 
     @Autowired
-    private InTasksRepos taskRepository;
+    public InTasksRepos taskRepository;
 
     @Autowired
-    private InUserRepos userRepository;
+    public InUserRepos userRepository;
 
     
     @PostMapping("/{userId}")

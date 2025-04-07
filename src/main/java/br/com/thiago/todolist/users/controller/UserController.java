@@ -3,16 +3,13 @@ package br.com.thiago.todolist.users.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.thiago.todolist.users.UserModel;
 import br.com.thiago.todolist.users.repository.InUserRepos;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import java.util.Optional;
 import java.util.UUID;
 
